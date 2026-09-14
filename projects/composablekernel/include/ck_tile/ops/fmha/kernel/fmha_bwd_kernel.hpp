@@ -489,6 +489,10 @@ struct FmhaBwdDQDKDVKernel
     static_assert(kUseQrQtrDorPipeline == (kMaxSeqLenQ != 0));
 #if defined(__gfx950__)
     static constexpr bool kIsAvailable = true;
+#elif defined(__gfx125__)
+    // gfx1250 has ds_load_tr but no async global->LDS, so only the QrQtrDor
+    // decode pipeline is ported out of the trload family.
+    static constexpr bool kIsAvailable = !kUseTrLoad || kUseQrQtrDorPipeline;
 #else
     static constexpr bool kIsAvailable = !kUseTrLoad;
 #endif
@@ -1265,9 +1269,6 @@ struct FmhaBwdDQDKDVKernel
     {
         if constexpr(kIsAvailable)
         {
-#if CK_TILE_EXPERIMENTAL_FMHA_BWD_WAVE_SCHED_MODE
-            ck_tile::set_gfx125_wave_sched_mode_dep_mode_2();
-#endif
             if constexpr(!kUsePersistent)
             {
                 if constexpr(kUseQrQtrDorPipeline || kIsGroupMode)
