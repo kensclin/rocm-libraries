@@ -184,10 +184,12 @@ std::vector<RequestedPass> parsePassNames(int argc, char** argv, int startIdx) {
                 arg.starts_with("--ds-read-per-cap=") ||
                 arg.starts_with("--ds-issue-cap-span-cycles=") ||
                 arg.starts_with("--tensor-load-wmma-space=") ||
+                arg.starts_with("--tensor-load-ds-load-gap-cycles=") ||
                 arg.starts_with("--global-read-queue-depth=") ||
                 arg.starts_with("--global-read-drain-latency=") ||
                 arg.starts_with("--merge-barrier-threshold=") ||
-                arg == "--enable-wmma-hide-budget-prescan" || arg.starts_with("--vgpr-msb-mode=") ||
+                arg == "--enable-wmma-hide-budget-prescan" ||
+                arg == "--enable-esm2-track-valu-vsrc" || arg.starts_with("--vgpr-msb-mode=") ||
                 arg == "--from-label" || arg == "--to-label" || isKernelConfigArg(arg))
                 continue;
             // Two-arg flags: skip both the flag and its value so the value
@@ -537,12 +539,17 @@ int main(int argc, char** argv) {
                 std::stoi(a.substr(std::string("--ds-issue-cap-span-cycles=").size()));
         } else if (a.starts_with("--tensor-load-wmma-space=")) {
             passFeatureConfig.dagFeatures.tensorLoadWmmaSpace = std::stoi(a.substr(25));
+        } else if (a.starts_with("--tensor-load-ds-load-gap-cycles=")) {
+            passFeatureConfig.dagFeatures.tensorLoadDsLoadGapCycles =
+                std::stoi(a.substr(std::string("--tensor-load-ds-load-gap-cycles=").size()));
         } else if (a.starts_with("--global-read-queue-depth=")) {
             passFeatureConfig.dagFeatures.globalReadQueueDepth = std::stoi(a.substr(26));
         } else if (a.starts_with("--global-read-drain-latency=")) {
             passFeatureConfig.dagFeatures.globalReadDrainLatency = std::stoi(a.substr(28));
         } else if (a == "--enable-wmma-hide-budget-prescan") {
             passFeatureConfig.dagFeatures.enableWmmaHideBudgetPrescan = true;
+        } else if (a == "--enable-esm2-track-valu-vsrc") {
+            passFeatureConfig.dagFeatures.enableESM2TrackValuVsrc = true;
         } else if (a.starts_with("--merge-barrier-threshold=")) {
             passFeatureConfig.dagFeatures.mergeBarrierThreshold = std::stoi(a.substr(26));
         }
